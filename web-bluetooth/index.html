@@ -1,0 +1,122 @@
+
+<html>
+
+
+<head>
+
+<script>
+
+/*
+function recordNearbyBeacon(major, minor, pathLossVs1m) { ... }
+navigator.bluetooth.requestLEScan({
+  filters: [{manufacturerData: {0x004C: {dataPrefix: new Uint8Array([
+    0x02, 0x15, // iBeacon identifier.
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15  // My beacon UUID.
+  ])}}}],
+  keepRepeatedDevices: true
+}).then(() => {
+  navigator.bluetooth.addEventListener('advertisementreceived', event => {
+    let appleData = event.manufacturerData.get(0x004C);
+    if (appleData.byteLength != 23) {
+      // Isn’t an iBeacon.
+      return;
+    }
+    let major = appleData.getUint16(18, false);
+    let minor = appleData.getUint16(20, false);
+    let txPowerAt1m = -appleData.getInt8(22);
+    let pathLossVs1m = txPowerAt1m - event.rssi;
+
+    recordNearbyBeacon(major, minor, pathLossVs1m);
+  });
+})
+*/
+
+</script>
+
+
+
+<body>
+
+サーバにSSLでおかないとだめかも。
+https://qiita.com/shozzy/items/dadea4181d6219d2d326
+
+netlify：
+https://qiita.com/sugo/items/2ee64887d682b0dae635
+まずgithub にファイルをおかないといけない。
+
+
+python -m http.server 8000
+https://qiita.com/youtoy/items/8e3cca2172e2c4806846
+
+
+
+<button type="button" onclick="startDeviceScanner();">scan</button>
+
+
+<script>
+
+
+
+const SCAN_OPTIONS = {
+    acceptAllAdvertisements: true,
+    keepRepeatedDevices: true
+};
+
+function startDeviceScanner() {
+
+console.log("try to start");
+    navigator.bluetooth.requestLEScan(SCAN_OPTIONS)
+        .then(scanner => {
+
+
+console.log("started");
+
+            console.log(scanner.active);
+			
+
+
+
+// iBeacon data
+const companyId = 0x004C;
+const manufacturerDataValuePrefix = "02";
+
+navigator.bluetooth.addEventListener('advertisementreceived', event => {
+
+console.log("listened");
+        let manuData = event. manufacturerData;
+
+        for (var [key, value] of manuData) {
+
+            var manufacturerDataValue_changedHex = "";
+
+            for (var i = 0; i < value.byteLength; i++) {
+
+                if (value.getUint8(i) < 0x0f) manufacturerDataValue_changedHex += "0";
+
+                    manufacturerDataValue_changedHex += value.getUint8(i).toString(16);
+
+            }
+
+            // narrow down to iBeacon
+            if (key === companyId  &&  manufacturerDataValue_changedHex.slice(0, 2) === manufacturerDataValuePrefix) {
+
+
+				console.log(event.device);
+                    /**
+                     * Display device data, etc…
+                     */
+
+            }
+        }
+});
+
+
+    })
+        .catch(error => { console.log(error); });
+
+}
+
+
+
+</script>
+
